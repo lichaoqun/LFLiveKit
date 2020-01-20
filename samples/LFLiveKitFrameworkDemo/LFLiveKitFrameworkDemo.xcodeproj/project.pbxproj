@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3483454423D446B6008278B2 /* LFLiveKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8495F6CE1DB8F37E00542124 /* LFLiveKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3483454523D446B6008278B2 /* LFLiveKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8495F6D01DB8F37E00542124 /* LFLiveKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		843591661DD201D200811FC7 /* LFLiveKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495F6CE1DB8F37E00542124 /* LFLiveKit.framework */; };
 		8495F6B01DB8F37300542124 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8495F6AF1DB8F37300542124 /* main.m */; };
 		8495F6B31DB8F37300542124 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8495F6B21DB8F37300542124 /* AppDelegate.m */; };
@@ -58,6 +60,20 @@
 			remoteInfo = LFLiveKitFramework;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3483454323D446A1008278B2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3483454423D446B6008278B2 /* LFLiveKit.framework in CopyFiles */,
+				3483454523D446B6008278B2 /* LFLiveKit.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		843591671DD204FA00811FC7 /* libstdc++.6.0.9.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.6.0.9.tbd"; path = "usr/lib/libstdc++.6.0.9.tbd"; sourceTree = SDKROOT; };
@@ -231,6 +247,7 @@
 				8495F6A71DB8F37300542124 /* Sources */,
 				8495F6A81DB8F37300542124 /* Frameworks */,
 				8495F6A91DB8F37300542124 /* Resources */,
+				3483454323D446A1008278B2 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -253,8 +270,8 @@
 				TargetAttributes = {
 					8495F6AA1DB8F37300542124 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = G497YX6CBT;
-						ProvisioningStyle = Automatic;
+						DevelopmentTeam = R9TTUZA6N2;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -263,6 +280,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -387,7 +405,9 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: wei liu (4599FFQGB3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: wei liu (4599FFQGB3)";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -434,7 +454,9 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: wei liu (4599FFQGB3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: wei liu (4599FFQGB3)";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -458,7 +480,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = G497YX6CBT;
+				CODE_SIGN_IDENTITY = "iPhone Developer: wei liu (4599FFQGB3)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = R9TTUZA6N2;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = LFLiveKitFrameworkDemo/Info.plist;
@@ -468,8 +492,9 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.youku.LFLiveKitFrameworkDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.tv.qie.LF;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = QIENEWNEW;
 			};
 			name = Debug;
 		};
@@ -477,7 +502,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = G497YX6CBT;
+				CODE_SIGN_IDENTITY = "iPhone Developer: wei liu (4599FFQGB3)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = R9TTUZA6N2;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = LFLiveKitFrameworkDemo/Info.plist;
@@ -487,8 +514,9 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.youku.LFLiveKitFrameworkDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.tv.qie.LF;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = QIENEWNEW;
 			};
 			name = Release;
 		};

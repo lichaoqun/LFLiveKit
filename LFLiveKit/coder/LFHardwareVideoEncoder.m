@@ -45,6 +45,7 @@
 
 - (void)resetCompressionSession {
     if (compressionSession) {
+        // - 关闭编码器
         VTCompressionSessionCompleteFrames(compressionSession, kCMTimeInvalid);
 
         VTCompressionSessionInvalidate(compressionSession);
@@ -52,11 +53,13 @@
         compressionSession = NULL;
     }
 
+    // - 创建编码器
     OSStatus status = VTCompressionSessionCreate(NULL, _configuration.videoSize.width, _configuration.videoSize.height, kCMVideoCodecType_H264, NULL, NULL, NULL, VideoCompressonOutputCallback, (__bridge void *)self, &compressionSession);
     if (status != noErr) {
         return;
     }
 
+    // - 设置编码器的参数
     _currentVideoBitRate = _configuration.videoBitRate;
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, (__bridge CFTypeRef)@(_configuration.videoMaxKeyframeInterval));
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, (__bridge CFTypeRef)@(_configuration.videoMaxKeyframeInterval/_configuration.videoFrameRate));
@@ -96,6 +99,7 @@
 }
 
 #pragma mark -- LFVideoEncoder
+// - MARK: <-- 视频编码 -->
 - (void)encodeVideoData:(CVPixelBufferRef)pixelBuffer timeStamp:(uint64_t)timeStamp {
     if(_isBackGround) return;
     frameCount++;
@@ -109,6 +113,7 @@
     }
     NSNumber *timeNumber = @(timeStamp);
 
+    // - 将视频数据送入编码器
     OSStatus status = VTCompressionSessionEncodeFrame(compressionSession, pixelBuffer, presentationTimeStamp, duration, (__bridge CFDictionaryRef)properties, (__bridge_retained void *)timeNumber, &flags);
     if(status != noErr){
         [self resetCompressionSession];
@@ -134,6 +139,7 @@
 }
 
 #pragma mark -- VideoCallBack
+// - MARK: <-- 编码完成数据回调 -->
 static void VideoCompressonOutputCallback(void *VTref, void *VTFrameRef, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer){
     if (!sampleBuffer) return;
     CFArrayRef array = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, true);
@@ -150,6 +156,8 @@ static void VideoCompressonOutputCallback(void *VTref, void *VTFrameRef, OSStatu
     }
 
     if (keyframe && !videoEncoder->sps) {
+        
+        // - 获取 sps 和 pps 数据
         CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
 
         size_t sparameterSetSize, sparameterSetCount;
@@ -192,6 +200,7 @@ static void VideoCompressonOutputCallback(void *VTref, void *VTFrameRef, OSStatu
 
             NALUnitLength = CFSwapInt32BigToHost(NALUnitLength);
 
+            // - 创建视频帧数据
             LFVideoFrame *videoFrame = [LFVideoFrame new];
             videoFrame.timestamp = timeStamp;
             videoFrame.data = [[NSData alloc] initWithBytes:(dataPointer + bufferOffset + AVCCHeaderLength) length:NALUnitLength];
@@ -200,6 +209,8 @@ static void VideoCompressonOutputCallback(void *VTref, void *VTFrameRef, OSStatu
             videoFrame.pps = videoEncoder->pps;
 
             if (videoEncoder.h264Delegate && [videoEncoder.h264Delegate respondsToSelector:@selector(videoEncoder:videoFrame:)]) {
+                
+                // - 编码完成, 准备发送
                 [videoEncoder.h264Delegate videoEncoder:videoEncoder videoFrame:videoFrame];
             }
 

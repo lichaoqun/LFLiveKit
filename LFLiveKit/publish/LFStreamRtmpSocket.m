@@ -148,6 +148,8 @@ SAVC(mp4a);
     [self.buffer appendObject:frame];
     
     if(!self.isSending){
+        
+        // - 发送视频帧数据
         [self sendFrame];
     }
 }
@@ -177,8 +179,12 @@ SAVC(mp4a);
                         _self.isSending = NO;
                         return;
                     }
+                    
+                    // - 发送 sps 和 pps
                     [_self sendVideoHeader:(LFVideoFrame *)frame];
                 } else {
+                    
+                    // - 发送视频数据
                     [_self sendVideo:(LFVideoFrame *)frame];
                 }
             } else {
@@ -299,6 +305,8 @@ Failed:
 #pragma mark -- Rtmp Send
 
 - (void)sendMetaData {
+    
+    // - 发送 @setDataFrame 数据包
     PILI_RTMPPacket packet;
 
     char pbuf[2048], *pend = pbuf + sizeof(pbuf);
@@ -353,6 +361,7 @@ Failed:
 
 - (void)sendVideoHeader:(LFVideoFrame *)videoFrame {
 
+    // - 拼接 sps 和 pps 的数据 准备发送
     unsigned char *body = NULL;
     NSInteger iIndex = 0;
     NSInteger rtmpLength = 1024;
@@ -397,6 +406,7 @@ Failed:
 
 - (void)sendVideo:(LFVideoFrame *)frame {
 
+    // - 拼接普通的视频数据
     NSInteger i = 0;
     NSInteger rtmpLength = frame.data.length + 9;
     unsigned char *body = (unsigned char *)malloc(rtmpLength);
@@ -417,16 +427,21 @@ Failed:
     body[i++] = (frame.data.length) & 0xff;
     memcpy(&body[i], frame.data.bytes, frame.data.length);
 
+    // - 发送数据
     [self sendPacket:RTMP_PACKET_TYPE_VIDEO data:body size:(rtmpLength) nTimestamp:frame.timestamp];
     free(body);
 }
 
+// - MARK: <-- 发送数据 -->
 - (NSInteger)sendPacket:(unsigned int)nPacketType data:(unsigned char *)data size:(NSInteger)size nTimestamp:(uint64_t)nTimestamp {
+    
+    // - 初始化数据的 packet
     NSInteger rtmpLength = size;
     PILI_RTMPPacket rtmp_pack;
     PILI_RTMPPacket_Reset(&rtmp_pack);
     PILI_RTMPPacket_Alloc(&rtmp_pack, (uint32_t)rtmpLength);
 
+    // - 拼接 rtmpHeader 和 rtmpBody
     rtmp_pack.m_nBodySize = (uint32_t)size;
     memcpy(rtmp_pack.m_body, data, size);
     rtmp_pack.m_hasAbsTimestamp = 0;
@@ -438,7 +453,8 @@ Failed:
         rtmp_pack.m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     }
     rtmp_pack.m_nTimeStamp = (uint32_t)nTimestamp;
-
+    
+    // - 发送数据
     NSInteger nRet = [self RtmpPacketSend:&rtmp_pack];
 
     PILI_RTMPPacket_Free(&rtmp_pack);

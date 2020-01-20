@@ -42,7 +42,7 @@
 @synthesize brightLevel = _brightLevel;
 @synthesize zoomScale = _zoomScale;
 
-#pragma mark -- LifeCycle
+// - MARK: <-- 初始化 -->
 - (instancetype)initWithVideoConfiguration:(LFLiveVideoConfiguration *)configuration {
     if (self = [super init]) {
         _configuration = configuration;
@@ -70,11 +70,10 @@
     }
 }
 
-#pragma mark -- Setter Getter
-
+/** 图像采集 */
 - (GPUImageVideoCamera *)videoCamera{
     if(!_videoCamera){
-        _videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:_configuration.avSessionPreset cameraPosition:AVCaptureDevicePositionFront];
+        _videoCamera = [[GPUImageVideoCamera alloc] initWithSessionPreset:_configuration.avSessionPreset cameraPosition:AVCaptureDevicePositionBack];
         _videoCamera.outputImageOrientation = _configuration.outputImageOrientation;
         _videoCamera.horizontallyMirrorFrontFacingCamera = NO;
         _videoCamera.horizontallyMirrorRearFacingCamera = NO;
@@ -83,6 +82,7 @@
     return _videoCamera;
 }
 
+/** 开始或者停止采集 */
 - (void)setRunning:(BOOL)running {
     if (_running == running) return;
     _running = running;
@@ -99,6 +99,7 @@
     }
 }
 
+/** 设置预览的 view */
 - (void)setPreView:(UIView *)preView {
     if (self.gpuImageView.superview) [self.gpuImageView removeFromSuperview];
     [preView insertSubview:self.gpuImageView atIndex:0];
@@ -130,6 +131,7 @@
     return self.videoCamera.frameRate;
 }
 
+/** 闪光灯 */
 - (void)setTorch:(BOOL)torch {
     BOOL ret;
     if (!self.videoCamera.captureSession) return;
@@ -267,7 +269,7 @@
     return _movieWriter;
 }
 
-#pragma mark -- Custom Method
+#pragma mark -- 处理视频
 - (void)processVideo:(GPUImageOutput *)output {
     __weak typeof(self) _self = self;
     @autoreleasepool {
