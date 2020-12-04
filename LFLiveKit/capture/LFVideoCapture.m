@@ -9,6 +9,7 @@
 #import "LFVideoCapture.h"
 #import "LFGPUImageBeautyFilter.h"
 #import "LFGPUImageEmptyFilter.h"
+#import "libyuv.h"
 
 #if __has_include(<GPUImage/GPUImage.h>)
 #import <GPUImage/GPUImage.h>
@@ -274,11 +275,45 @@
     __weak typeof(self) _self = self;
     @autoreleasepool {
         GPUImageFramebuffer *imageFramebuffer = output.framebufferForOutput;
+#if 1
         CVPixelBufferRef pixelBuffer = [imageFramebuffer pixelBuffer];
+#else
+        CVPixelBufferRef pixelBuffer = [self getNV12PixelBufferFrom:imageFramebuffer];
+#endif
         if (pixelBuffer && _self.delegate && [_self.delegate respondsToSelector:@selector(captureOutput:pixelBuffer:)]) {
             [_self.delegate captureOutput:_self pixelBuffer:pixelBuffer];
         }
     }
+}
+
+#define pixel_stride(wid) ((wid % 16 != 0) ? ((wid) + 16 - (wid) % 16): (wid))
+-(CVPixelBufferRef)getNV12PixelBufferFrom:(GPUImageFramebuffer *)imageFramebuffer{
+
+    // - 视频的宽高 (确保视频的宽度是16的整数倍)
+    int width = pixel_stride((int)imageFramebuffer.size.width);
+    int height = imageFramebuffer.size.height;
+   
+
+    // - 最终生成的像素数据
+    CVPixelBufferRef pixelBuf;
+    CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_420YpCbCr8Planar, NULL, &pixelBuf);
+    
+    // - y u v 三个平面的地址
+    CVPixelBufferLockBaseAddress(pixelBuf, 0);
+    uint8_t *y_frame = CVPixelBufferGetBaseAddressOfPlane(pixelBuf, 0);
+    uint8_t *u_frame = CVPixelBufferGetBaseAddressOfPlane(pixelBuf, 1);
+    uint8_t *v_frame = CVPixelBufferGetBaseAddressOfPlane(pixelBuf, 2);
+    CVPixelBufferUnlockBaseAddress(pixelBuf,0);
+
+    // - y uv的步长
+    int i_420_stride_y = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuf, 0);
+    int i_420_stride_u = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuf, 1);
+    int i_420_stride_v = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuf, 2);
+    
+    // - argb -> i420的地址
+    ARGBToI420([imageFramebuffer byteBuffer], width * 4, y_frame, i_420_stride_y, u_frame, i_420_stride_u, v_frame, i_420_stride_v, width, height);
+
+    return pixelBuf;
 }
 
 - (void)reloadFilter{
