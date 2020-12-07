@@ -42,7 +42,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
                                                  selector: @selector(handleInterruption:)
                                                      name: AVAudioSessionInterruptionNotification
                                                    object: session];
-        
+        // - 创建音元件描述信息
         AudioComponentDescription acd;
         acd.componentType = kAudioUnitType_Output;
         //acd.componentSubType = kAudioUnitSubType_VoiceProcessingIO;
@@ -51,8 +51,10 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         acd.componentFlags = 0;
         acd.componentFlagsMask = 0;
         
+        // - 获取音频单元原件
         self.component = AudioComponentFindNext(NULL, &acd);
         
+        // - 使用一个音频单元实例来存储一个音频单元元件, 音频单元实例主要用来存储音频单元
         OSStatus status = noErr;
         status = AudioComponentInstanceNew(self.component, &_componetInstance);
         
@@ -60,10 +62,11 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
             [self handleAudioComponentCreationFailure];
         }
         
+        /** 连接麦克风采集声音 */
         UInt32 flagOne = 1;
-        
         AudioUnitSetProperty(self.componetInstance, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &flagOne, sizeof(flagOne));
         
+        // - 配置麦克风采集后输出的音频的参数
         AudioStreamBasicDescription desc = {0};
         desc.mSampleRate = _configuration.audioSampleRate;
         desc.mFormatID = kAudioFormatLinearPCM;
@@ -74,12 +77,17 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         desc.mBytesPerFrame = desc.mBitsPerChannel / 8 * desc.mChannelsPerFrame;
         desc.mBytesPerPacket = desc.mBytesPerFrame * desc.mFramesPerPacket;
         
+        
+        // - 配置麦克风输出的数据格式
+        AudioUnitSetProperty(self.componetInstance, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &desc, sizeof(desc));
+        
+        // - 设置采集到数据的回调函数结构体
         AURenderCallbackStruct cb;
         cb.inputProcRefCon = (__bridge void *)(self);
         cb.inputProc = handleInputBuffer;
-        AudioUnitSetProperty(self.componetInstance, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &desc, sizeof(desc));
         AudioUnitSetProperty(self.componetInstance, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 1, &cb, sizeof(cb));
         
+        // - 初始化音频单元, 即 根据self.componetInstance已有的值为self.componetInstance设置一些默认的值
         status = AudioUnitInitialize(self.componetInstance);
         
         if (noErr != status) {
@@ -213,6 +221,14 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
 }
 
 #pragma mark -- CallBack
+/*
+ inRefCon : 参数指向回调附加到 audio unit 输入时指定的编程上下文
+ ioActionFlags : ioActionFlags，参数允许提供提示当没有音频数据处理时，例如当你的应用程序是合成吉他，用户当面没有播放，请执行此操作。当你想要输出静音，可以在回调主体中使用如下语句：*ioActionFlags |= kAudioUnitRenderAction_OutputIsSilence，并且你必须明确地将 ioData 参数指向的缓冲区设置为0。
+ inTimeStamp : 回调函数被触发时间，包含一个 AudioTimeStamp 结构体。
+ inBusNumber : 参数指示调用回调的音频单元总线
+ inNumberFrames : 当前调用的音频采样数
+ ioData : 指向音频数据缓存区
+ */
 static OSStatus handleInputBuffer(void *inRefCon,
                                   AudioUnitRenderActionFlags *ioActionFlags,
                                   const AudioTimeStamp *inTimeStamp,
