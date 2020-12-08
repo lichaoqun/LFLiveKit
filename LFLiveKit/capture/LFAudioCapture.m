@@ -42,7 +42,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
                                                  selector: @selector(handleInterruption:)
                                                      name: AVAudioSessionInterruptionNotification
                                                    object: session];
-        // - 创建音元件描述信息
+        // - 创建音频元件描述信息 主要的四大类型 均衡器/混音/输入输出/格式转换;
         AudioComponentDescription acd;
         acd.componentType = kAudioUnitType_Output;
         //acd.componentSubType = kAudioUnitSubType_VoiceProcessingIO;
@@ -51,10 +51,10 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         acd.componentFlags = 0;
         acd.componentFlagsMask = 0;
         
-        // - 获取音频单元原件
+        // - 根据音频原件描述信息获取音频单元元件
         self.component = AudioComponentFindNext(NULL, &acd);
         
-        // - 使用一个音频单元实例来存储一个音频单元元件, 音频单元实例主要用来存储音频单元
+        // - 使用一个音频单元实例来存储一个音频单元元件, 音频单元实例主要用来存储音频单元, AudioComponentInstance 就是常说的AudioUnit, typedef AudioComponentInstance AudioUnit;
         OSStatus status = noErr;
         status = AudioComponentInstanceNew(self.component, &_componetInstance);
         
@@ -66,7 +66,7 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         UInt32 flagOne = 1;
         AudioUnitSetProperty(self.componetInstance, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &flagOne, sizeof(flagOne));
         
-        // - 配置麦克风采集后输出的音频的参数
+        // - 配置麦克风采集后输出的音频的参数并配置麦克风输出的数据格式
         AudioStreamBasicDescription desc = {0};
         desc.mSampleRate = _configuration.audioSampleRate;
         desc.mFormatID = kAudioFormatLinearPCM;
@@ -76,9 +76,6 @@ NSString *const LFAudioComponentFailedToCreateNotification = @"LFAudioComponentF
         desc.mBitsPerChannel = 16;
         desc.mBytesPerFrame = desc.mBitsPerChannel / 8 * desc.mChannelsPerFrame;
         desc.mBytesPerPacket = desc.mBytesPerFrame * desc.mFramesPerPacket;
-        
-        
-        // - 配置麦克风输出的数据格式
         AudioUnitSetProperty(self.componetInstance, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &desc, sizeof(desc));
         
         // - 设置采集到数据的回调函数结构体
